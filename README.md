@@ -1,5 +1,5 @@
 # Oracle database
 
-- Scripts úteis Oracle
+- Scripts úteis
 - Scripts de estudos
 
