@@ -1,0 +1,38 @@
+--+-------------------------------------------------------------------------------------------------+--
+-- bloco para executar DML com controle de sessão sleep : suspende a sessão por um determinado período.
+--+-------------------------------------------------------------------------------------------------+--
+
+set timing on
+set serveroutput on
+
+DECLARE
+  resource_busy EXCEPTION;
+  PRAGMA EXCEPTION_INIT(resource_busy, -00054);
+  naoexecutou BOOLEAN := TRUE;
+  VCOUNT NUMBER := 0;
+  C_ROLLBACK  VARCHAR2(2000) := 'DELETE FROM OWNER.TABELA  WHERE idt_abc = 99 and des_abc = ''XYZ''';
+  C_SQL   VARCHAR2(2000) := 'insert into OWNER.TABELA (idt_abc, des_abc) values (99, ''XYZ'')';
+
+BEGIN
+SELECT COUNT(1) INTO VCOUNT FROM OWNER.TABELA  WHERE des_abc = 'XYZ';
+	IF VCOUNT = 0 THEN
+		WHILE naoexecutou
+		LOOP	
+			begin 
+				EXECUTE IMMEDIATE C_SQL;
+				naoexecutou := FALSE;
+				DBMS_OUTPUT.PUT_LINE('REGISTRO INSERIDO COM SUCESSO !');
+				DBMS_OUTPUT.PUT_LINE('SCRIPT ROLLBACK : '||C_ROLLBACK);
+				COMMIT;
+			EXCEPTION
+				WHEN resource_busy THEN
+					dbms_lock.sleep(1);
+				WHEN OTHERS THEN
+					RAISE;
+			END;
+		END LOOP;
+	ELSE 
+dbms_output.put_line('*** Registro existente: ' || sys_context('USERENV','INSTANCE_NAME') || ' / ' || sys_context('USERENV','SERVER_HOST'));	
+	END IF;	  
+END;
+/
