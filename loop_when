@@ -1,4 +1,6 @@
-set SERVEROUTPUT ON
+set echo on
+set timing on
+set serveroutput on
 
 declare
 data_proc date := 'dd/mm/yyyy';
