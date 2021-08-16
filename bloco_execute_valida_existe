@@ -1,0 +1,17 @@
+--+-------------------------------------------------------------------------------------------------+--
+-- bloco para validacao se existe, para entao executar
+--+-------------------------------------------------------------------------------------------------+--
+
+declare
+    nCount NUMBER;
+    VSQL000 VARCHAR2(1000)  := 'ALTER TABLE owner.tabela ADD(campo1 NUMBER(10,0) NOT NULL)';
+    VSQL001 VARCHAR2(1000)  := q'[COMMENT ON COLUMN owner.tabela.campo1 is '[BLA BLA BLA] DESCRIACAO bla bla ']';
+begin
+SELECT COUNT(*) INTO nCount 
+	FROM ALL_TAB_COLUMNS WHERE OWNER  = 'owner' AND TABLE_NAME  = 'tabela' AND COLUMN_NAME = 'campo1';
+IF (nCount <= 0) THEN            
+    execute immediate VSQL000;
+		execute immediate VSQL001;
+END IF;
+end;
+/
