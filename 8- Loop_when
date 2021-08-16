@@ -1,0 +1,21 @@
+set SERVEROUTPUT ON
+
+declare
+data_proc date := 'dd/mm/yyyy';
+qtd number := 0;
+
+begin
+LOOP
+EXIT WHEN data_proc > 'dd/mm/yyyy' ;
+
+DBMS_OUTPUT.PUT_LINE('Proxima data: ' ||data_proc); 
+
+    select count(1) into qtd
+    from table_name where column_name = data_proc;
+
+DBMS_OUTPUT.PUT_LINE('qtd: ' || qtd || ' data: ' || data_proc); 
+
+data_proc := data_proc + 1;
+
+END LOOP;
+end;
