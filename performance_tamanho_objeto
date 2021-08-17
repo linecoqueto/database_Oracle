@@ -1,0 +1,54 @@
+----------- *** TAMANHO DA TABELA
+
+SELECT e.owner
+, e.segment_name
+, ROUND(sum(e.bytes)/1024/1024,2) "SIZE (MB)"
+, ROUND(sum(e.bytes)/1024/1024/1024,2) "SIZE (GB)"
+, ROUND(sum(e.bytes)/1024/1024/1024/1024,2) "SIZE (TB)"
+FROM dba_extents e
+where E.SEGMENT_NAME IN ('table_name1','table_name2','table_name3')
+and owner != 'SYSTEM'
+GROUP BY e.owner, e.segment_name;
+
+----------- *** TAMANHO DA UTILIZAÇÃO DE UM INDEX
+
+select
+owner,
+segment_name,
+segment_type,
+ROUND(sum(bytes)/1024/1024,2) "SIZE (MB)"
+, ROUND(sum(bytes)/1024/1024/1024,2) "SIZE (GB)"
+, ROUND(sum(bytes)/1024/1024/1024/1024,2) "SIZE (TB)"
+from dba_segments
+where segment_type='INDEX' and segment_name = 'index_idx01'
+GROUP BY owner, segment_name, segment_type;
+
+----------- *** TAMANHO DA UTILIZAÇÃO DA TABLESPACE
+
+SELECT DDF.TABLESPACE_NAME
+,ROUND(DDF.BYTES/1024/1024/1024/1024,2)"TAMANHO ATUAL (TB)"
+,ROUND(DDF.MAXBYTES/1024/1024/1024/1024,2) "TAMANHO MAXIMO (TB)"
+,ROUND(USED_PERCENT,2) USED_PERCENT
+FROM DBA_DATA_FILES DDF
+INNER JOIN DBA_TABLESPACE_USAGE_METRICS DTUM
+ON DDF.TABLESPACE_NAME = DTUM.TABLESPACE_NAME
+WHERE DDF.TABLESPACE_NAME = 'tablespace_name1';
+
+--
+
+SELECT DISTINCT d.tablespace_name "NOME DA TABLESPACE",
+round(t.total, 2) "TOTAL(GB)",
+round(NVL(f.livre, 0), 2) "LIVRE(GB)",
+round((NVL(f.livre,0)*100/t.total), 1) "LIVRE(%)",
+round(m.maximo, 2) "MAX(GB)",
+round(m.maximo - t.total + nvl(f.livre, 0), 2) as "LIVRE-MAX(GB)",
+round(((m.maximo - t.total + NVL(f.livre,0))*100/m.maximo), 1) "LIVRE-MAX(%)"
+FROM dba_data_files d,
+(SELECT tablespace_name ,sum(bytes)/1024/1024/1024 total FROM dba_data_files GROUP BY tablespace_name) t,
+(SELECT tablespace_name ,sum(bytes)/1024/1024/1024 livre FROM dba_free_space GROUP BY tablespace_name) f,
+(select tablespace_name ,sum(nvl(nullif(maxbytes,0),bytes))/1024/1024/1024 maximo from dba_data_files group by tablespace_name) m
+WHERE d.tablespace_name = t.tablespace_name
+AND d.tablespace_name = f.tablespace_name(+)
+and d.tablespace_name = m.tablespace_name
+and t.tablespace_name like upper(nvl('&tablespace', '%'))
+ORDER BY 4 DESC;
