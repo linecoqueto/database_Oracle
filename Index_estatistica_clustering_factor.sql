@@ -1,3 +1,5 @@
+-- VERIFICA A ESTATISTICA DO INDEX : CLUSTERING FACTOR
+
 --quanto mais proximo o numero de blocos (blocks) do clustering factor MELHOR : isso significa que a chave do index ta mais juntinha.
 --quanto mais proximo o numero de linhas (num_rows) do clustering factor PIOR.
 
